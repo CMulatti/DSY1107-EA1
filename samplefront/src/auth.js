@@ -197,3 +197,15 @@ export function estaExpirado(token) {
   const exp = decodificarJwt(token)?.exp
   return exp ? exp * 1000 < Date.now() : true
 }
+
+//-----------------------------------------STEP 7 -------------------------------------------------//
+export function logout() {
+  sessionStorage.removeItem(CLAVE_TOKENS)
+  // Borrar el token local NO cierra la sesión en el IDaaS. Si no pasamos por
+  // /logout, el próximo login entra solo: eso es SSO.
+  const params = new URLSearchParams({
+    client_id: cfg.clientId,
+    logout_uri: cfg.redirectUri,
+  })
+  window.location.assign(`${cfg.dominio}/logout?${params}`)
+}
