@@ -1,6 +1,12 @@
 resource "aws_apigatewayv2_api" "api_manager" {
   name          = "api-mindicador"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["http://localhost:5173"]
+    allow_methods = ["GET", "OPTIONS"]
+    allow_headers = ["Authorization", "Content-Type"]
+  }
 }
 
 resource "aws_apigatewayv2_integration" "backend" {
@@ -12,8 +18,16 @@ resource "aws_apigatewayv2_integration" "backend" {
 }
 
 resource "aws_apigatewayv2_route" "datos" {
+  api_id             = aws_apigatewayv2_api.api_manager.id
+  route_key          = "GET /datos"
+  target             = "integrations/${aws_apigatewayv2_integration.backend.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
+}
+
+resource "aws_apigatewayv2_route" "datos_publico" {
   api_id    = aws_apigatewayv2_api.api_manager.id
-  route_key = "GET /datos"
+  route_key = "GET /publico/datos"
   target    = "integrations/${aws_apigatewayv2_integration.backend.id}"
 }
 
@@ -27,4 +41,16 @@ resource "aws_apigatewayv2_stage" "dev" {
   api_id      = aws_apigatewayv2_api.api_manager.id
   name        = "dev"
   auto_deploy = true
+}
+
+resource "aws_apigatewayv2_authorizer" "cognito" {
+  api_id           = aws_apigatewayv2_api.api_manager.id
+  authorizer_type  = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+  name             = "cognito-authorizer"
+
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.spa.id]
+    issuer   = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.pool.id}"
+  }
 }

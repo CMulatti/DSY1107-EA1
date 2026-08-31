@@ -46,7 +46,7 @@ resource "aws_cognito_user_pool_client" "spa" {
   allowed_oauth_flows_user_pool_client = true
   allowed_oauth_flows                  = ["code"]
   supported_identity_providers         = ["COGNITO"]
-  allowed_oauth_scopes                 = ["openid", "email", "profile"]
+  allowed_oauth_scopes                 = ["openid", "email", "profile", "aws.cognito.signin.user.admin"]
 
   # Debe coincidir EXACTAMENTE con el redirect_uri que envíe la aplicación,
   # incluida la barra final. Es el error número uno de esta actividad.
