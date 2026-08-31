@@ -175,3 +175,25 @@ if (!respuesta.ok) {
 sessionStorage.setItem(CLAVE_TOKENS, JSON.stringify(datos))
 return datos
 }
+
+
+
+//------------------------------------------- STEP 5 --------------------------------------------------//
+/*Decodifica el payload de un JWT. NO verifica la firma: eso lo hace el API Gateway con las claves públicas de /jwks. 
+Aquí solo se lee para mostrarlo.*/
+
+export function decodificarJwt(token) {
+  if (!token) return null
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const bytes = Uint8Array.from(atob(payload), (c) => c.charCodeAt(0))
+    return JSON.parse(new TextDecoder().decode(bytes))
+} catch {
+  return null
+}
+}
+
+export function estaExpirado(token) {
+  const exp = decodificarJwt(token)?.exp
+  return exp ? exp * 1000 < Date.now() : true
+}

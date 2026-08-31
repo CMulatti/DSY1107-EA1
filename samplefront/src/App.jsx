@@ -41,7 +41,7 @@ export default function App() {
 }*/
 
 //STEP4
-import {useEffect, useState} from 'react'
+/*import {useEffect, useState} from 'react'
 import {login, procesarRetorno, getTokens} from './auth.js'
 
 export default function App() {
@@ -59,5 +59,53 @@ return (
   {error && <p className="error">{error}</p>}
   {tokens ? <p>Sesión iniciada.</p> : <button onClick={login}>Iniciar sesión con Cognito</button>}
   </main>
+  )
+}*/
+
+//STEP 5
+import {useEffect, useState} from 'react'
+import {
+  login,
+  procesarRetorno,
+  getTokens,
+  getIdToken,
+  getAccessToken,
+  decodificarJwt,
+  estaExpirado,
+} from './auth.js'
+
+export default function App() {
+  const [tokens, setTokens] = useState(getTokens())
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    procesarRetorno()
+      .then((nuevos) => nuevos && setTokens(nuevos))
+      .catch((e) => setError(e.message))
+  }, [])
+
+  const idClaims = decodificarJwt(getIdToken())
+  const accessClaims = decodificarJwt(getAccessToken())
+  const sesionActiva = Boolean(tokens) && !estaExpirado(getAccessToken())
+
+  return (
+    <main>
+      <h1>DSY1107 · Identidad con Cognito</h1>
+      {error && <p className="error">{error}</p>}
+      {tokens ? <p>Sesión iniciada.</p> : <button onClick={login}>Iniciar sesión con Cognito</button>}
+
+      {sesionActiva && (
+        <>
+          <details open>
+            <summary>ID Token · claims</summary>
+            <pre>{JSON.stringify(idClaims, null, 2)}</pre>
+          </details>
+          <details>
+            <summary>Access Token · claims</summary>
+            <pre>{JSON.stringify(accessClaims, null, 2)}</pre>
+          </details>
+        </>
+      )}
+    </main>
   )
 }
