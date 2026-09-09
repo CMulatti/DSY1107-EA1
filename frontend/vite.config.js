@@ -9,4 +9,7 @@ server: {
 port: 5173,
 strictPort: true,
 },
+build: {
+    outDir: 'dist/frontend/browser',
+  },
 })
