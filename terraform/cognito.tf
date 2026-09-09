@@ -50,8 +50,8 @@ resource "aws_cognito_user_pool_client" "spa" {
 
   # Debe coincidir EXACTAMENTE con el redirect_uri que envíe la aplicación,
   # incluida la barra final. Es el error número uno de esta actividad.
-  callback_urls = ["http://localhost:5173/", "https://main.danypufef7z9y.amplifyapp.com/",]
-  logout_urls   = ["http://localhost:5173/", "https://main.danypufef7z9y.amplifyapp.com/",]
+  callback_urls = ["http://localhost:5173/",  "${local.url_amplify}/",]
+  logout_urls   = ["http://localhost:5173/",  "${local.url_amplify}/",]
 
   # ALLOW_USER_PASSWORD_AUTH se habilita solo para poder probar por consola en
   # el paso 7. En el paso 10 se quita: una app nunca debe ver la contraseña.

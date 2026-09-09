@@ -3,7 +3,7 @@ resource "aws_apigatewayv2_api" "api_manager" {
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_origins = ["http://localhost:5173", "https://main.danypufef7z9y.amplifyapp.com",]
+    allow_origins = ["http://localhost:5173", local.url_amplify,]
     allow_methods = ["GET", "OPTIONS"]
     allow_headers = ["Authorization", "Content-Type"]
   }
