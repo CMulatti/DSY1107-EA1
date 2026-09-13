@@ -9,7 +9,7 @@ resource "aws_amplify_app" "front" {
   }
 }
 
-resource "aws_amplify_branch" "main" {
+resource "aws_amplify_branch" "main" {  //Amplify publica por rama: cada rama tiene su propia URL y su propio historial
   app_id      = aws_amplify_app.front.id
   branch_name = "main"
   framework   = "React"

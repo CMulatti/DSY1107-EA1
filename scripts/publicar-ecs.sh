@@ -37,8 +37,8 @@ leer() {
   local desde_entorno="${!1:-}"
   if [ -n "$desde_entorno" ]; then
     echo "$desde_entorno"
-  elif command -v terraform >/dev/null 2>&1 && $TF output -raw "$2" >/dev/null 2>&1; then
-    $TF output -raw "$2"
+  elif command -v terraform >/dev/null 2>&1 && terraform -chdir="${RAIZ}/terraform" output -raw "$2" >/dev/null 2>&1; then
+    terraform -chdir="${RAIZ}/terraform" output -raw "$2"
   else
     echo "Falta \$$1 y no hay salida '$2' en Terraform." >&2
     return 1
