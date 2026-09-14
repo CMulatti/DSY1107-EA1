@@ -109,6 +109,7 @@ backend:
     origenes:
       - http://localhost:4200
       - http://localhost:5173
+      - https://main.d237e38xy9o9t.amplifyapp.com
 
 # -----------------------------------------------------------------------------
 # Actuator: /actuator/health es lo que sondea el entorno de Beanstalk.
