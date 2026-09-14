@@ -3,6 +3,8 @@
 resource "aws_cognito_user_pool" "pool" {
   name = "dsy1107-grupoXX"
 
+  user_pool_tier = "ESSENTIALS"
+
   # El correo es el nombre de usuario, como en cualquier CIAM.
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
@@ -21,7 +23,12 @@ resource "aws_cognito_user_pool" "pool" {
     allow_admin_create_user_only = true
   }
 
-
+  lambda_config {
+    pre_token_generation_config {
+      lambda_arn      = aws_lambda_function.user_token_ms.arn
+      lambda_version  = "V2_0"
+    }
+  }
 }
 
 resource "aws_cognito_user_pool_domain" "hosted_ui" {
@@ -83,4 +90,45 @@ resource "aws_cognito_user" "demo" {
 
   #No enviar correo de invitación: el usuario es ficticio
   message_action = "SUPPRESS"
+}
+
+
+//added in 1.3.11 Creando scopes en Cognito para autorizar APIs en API GT
+# -----------------------------------------------------------------------------
+# El resource server: declara que los scopes EXISTEN. No los concede a nadie.
+# -----------------------------------------------------------------------------
+resource "aws_cognito_resource_server" "productos" {
+  identifier   = "productos"
+  name         = "API de productos"
+  user_pool_id = aws_cognito_user_pool.pool.id
+
+  scope {
+    scope_name        = "read"
+    scope_description = "Consultar productos"
+  }
+  scope {
+    scope_name        = "write"
+    scope_description = "Crear y eliminar"
+  }
+}
+
+# -----------------------------------------------------------------------------
+# Los grupos: aqui vive el permiso de cada persona.
+# -----------------------------------------------------------------------------
+resource "aws_cognito_user_group" "lectores" {
+  name         = "lectores"
+  user_pool_id = aws_cognito_user_pool.pool.id
+  description  = "Puede consultar productos"
+}
+
+resource "aws_cognito_user_group" "editores" {
+  name         = "editores"
+  user_pool_id = aws_cognito_user_pool.pool.id
+  description  = "Puede crear, modificar y eliminar productos"
+}
+
+resource "aws_cognito_user_in_group" "demo_lector" {
+  user_pool_id = aws_cognito_user_pool.pool.id
+  group_name   = aws_cognito_user_group.lectores.name
+  username     = aws_cognito_user.demo.username
 }

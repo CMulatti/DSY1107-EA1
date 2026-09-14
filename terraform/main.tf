@@ -83,7 +83,8 @@ resource "aws_apigatewayv2_integration" "productos_elemento" {
   }
 }
 
-resource "aws_apigatewayv2_route" "productos_coleccion" {
+//DELETED in 1.3.11
+/*resource "aws_apigatewayv2_route" "productos_coleccion" {
   api_id             = aws_apigatewayv2_api.api_manager.id
   route_key          = "ANY /productos"
   target             = "integrations/${aws_apigatewayv2_integration.productos_coleccion.id}"
@@ -97,7 +98,30 @@ resource "aws_apigatewayv2_route" "productos_elemento" {
   target             = "integrations/${aws_apigatewayv2_integration.productos_elemento.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
+}*/
+
+locals {
+  rutas_productos = {
+    "GET /productos"             = { scope = "productos/read",  integracion = aws_apigatewayv2_integration.productos_coleccion.id }
+    "POST /productos"            = { scope = "productos/write", integracion = aws_apigatewayv2_integration.productos_coleccion.id }
+    "GET /productos/{proxy+}"    = { scope = "productos/read",  integracion = aws_apigatewayv2_integration.productos_elemento.id }
+    "PUT /productos/{proxy+}"    = { scope = "productos/write", integracion = aws_apigatewayv2_integration.productos_elemento.id }
+    "DELETE /productos/{proxy+}" = { scope = "productos/write", integracion = aws_apigatewayv2_integration.productos_elemento.id }
+  }
 }
+
+resource "aws_apigatewayv2_route" "productos" {
+  for_each = local.rutas_productos
+
+  api_id    = aws_apigatewayv2_api.api_manager.id
+  route_key = each.key
+  target    = "integrations/${each.value.integracion}"
+
+  authorization_type   = "JWT"
+  authorizer_id         = aws_apigatewayv2_authorizer.cognito.id
+  authorization_scopes = [each.value.scope]
+}
+
 
 //------------------------API GT OUTPUTS ------------------------
 
